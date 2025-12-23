@@ -17,23 +17,79 @@
     </head>
     <body>
         <h1>Tic Tac Toe Game</h1>
-        <table class="game-board">
+        <table id="game-board" class="game-board">
             <tr>
-                <td></td>
-                <td>X</td>
-                <td></td>
+                <td id="cell-0,0"></td>
+                <td id="cell-0,1"></td>
+                <td id="cell-0,2"></td>
             </tr>
             <tr>
-                <td></td>
-                <td></td>
-                <td>O</td>
+                <td id="cell-1,0"></td>
+                <td id="cell-1,1"></td>
+                <td id="cell-1,2"></td>
             </tr>
             <tr>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td id="cell-2,0"></td>
+                <td id="cell-2,1"></td>
+                <td id="cell-2,2"></td>
             </tr>
-          
         </table>
     </body>
+    <script>
+        const board = document.getElementById('game-board');
+        let currentPlayer = 'X';
+        const gameState = [['','',''],['','',''],['','','']];
+
+        board.addEventListener('click', function(event) {
+            const target = event.target;
+
+
+            if (target.tagName === 'TD' && target.textContent === '') {
+                const coordinate = target.id.split("-")[1].split(",");
+
+                target.textContent = currentPlayer;
+                gameState[coordinate[0]][coordinate[1]] = currentPlayer;
+                console.log(gameState);
+
+                if (gameState[0][0] == currentPlayer && gameState[0][1] == currentPlayer && gameState[0][2] == currentPlayer) {
+                    alert(currentPlayer + " win!");
+                }
+                if (gameState[1][0] == currentPlayer && gameState[1][1] == currentPlayer && gameState[1][2] == currentPlayer) {
+                    alert(currentPlayer + " win!");
+                }
+                if (gameState[2][0] == currentPlayer && gameState[2][1] == currentPlayer && gameState[2][2] == currentPlayer) {
+                    alert(currentPlayer + " win!");
+                }
+                if (gameState[0][0] == currentPlayer && gameState[1][0] == currentPlayer && gameState[2][0] == currentPlayer) {
+                    alert(currentPlayer + " win!");
+                }
+                if (gameState[0][1] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][1] == currentPlayer) {
+                    alert(currentPlayer + " win!");
+                }
+                if (gameState[0][2] == currentPlayer && gameState[1][2] == currentPlayer && gameState[2][2] == currentPlayer) {
+                    alert(currentPlayer + " win!");
+                }
+                if (gameState[0][2] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][0] == currentPlayer) {
+                    alert(currentPlayer + " win!");
+                }
+                if (gameState[0][0] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][2] == currentPlayer) {
+                    alert(currentPlayer + " win!");
+                }
+                var draw = true;
+                for (var i = 0; i < 3; ++i) {
+                    for (var j = 0; j < 3; ++j) {
+                        if (gameState[i][j] == '') {
+                            draw = false;
+                        }
+                    }
+                }
+                if (draw) {
+                    alert("Draw!");
+                }
+
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            }
+        });
+
+    </script>
 </html>

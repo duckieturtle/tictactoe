@@ -40,9 +40,13 @@
         let currentPlayer = 'X';
         const gameState = [['','',''],['','',''],['','','']];
 
+        function resetGame() {
+            gameState.forEach(row => row.fill(''));
+            board.querySelectorAll('td').forEach(cell => cell.textContent = '');
+        }
+
         board.addEventListener('click', function(event) {
             const target = event.target;
-
 
             if (target.tagName === 'TD' && target.textContent === '') {
                 const coordinate = target.id.split("-")[1].split(",");
@@ -53,27 +57,35 @@
 
                 if (gameState[0][0] == currentPlayer && gameState[0][1] == currentPlayer && gameState[0][2] == currentPlayer) {
                     alert(currentPlayer + " win!");
+                    resetGame();
                 }
                 if (gameState[1][0] == currentPlayer && gameState[1][1] == currentPlayer && gameState[1][2] == currentPlayer) {
                     alert(currentPlayer + " win!");
+                    resetGame();
                 }
                 if (gameState[2][0] == currentPlayer && gameState[2][1] == currentPlayer && gameState[2][2] == currentPlayer) {
                     alert(currentPlayer + " win!");
+                    resetGame();
                 }
                 if (gameState[0][0] == currentPlayer && gameState[1][0] == currentPlayer && gameState[2][0] == currentPlayer) {
                     alert(currentPlayer + " win!");
+                    resetGame();
                 }
                 if (gameState[0][1] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][1] == currentPlayer) {
                     alert(currentPlayer + " win!");
+                    resetGame();
                 }
                 if (gameState[0][2] == currentPlayer && gameState[1][2] == currentPlayer && gameState[2][2] == currentPlayer) {
                     alert(currentPlayer + " win!");
+                    resetGame();
                 }
                 if (gameState[0][2] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][0] == currentPlayer) {
                     alert(currentPlayer + " win!");
+                    resetGame();
                 }
                 if (gameState[0][0] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][2] == currentPlayer) {
                     alert(currentPlayer + " win!");
+                    resetGame();
                 }
                 var draw = true;
                 for (var i = 0; i < 3; ++i) {
@@ -83,8 +95,10 @@
                         }
                     }
                 }
+                
                 if (draw) {
                     alert("Draw!");
+                    resetGame();
                 }
 
                 currentPlayer = currentPlayer === 'X' ? 'O' : 'X';

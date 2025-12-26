@@ -66,40 +66,44 @@
         function displayWinner() {
             document.getElementById('banner').style.display = 'flex';
             document.getElementById('banner').textContent = `Player ${currentPlayer} win!`;
+            setTimeout(() => {
+                document.getElementById('banner').style.display = 'none';
+                resetGame();
+            }, 2000);
         }
 
         function check() {
             if (gameState[0][0] == currentPlayer && gameState[0][1] == currentPlayer && gameState[0][2] == currentPlayer) {
                 displayWinner();
-                resetGame();
+              
             }
             if (gameState[1][0] == currentPlayer && gameState[1][1] == currentPlayer && gameState[1][2] == currentPlayer) {
                 displayWinner();
-                resetGame();
+            
             }
             if (gameState[2][0] == currentPlayer && gameState[2][1] == currentPlayer && gameState[2][2] == currentPlayer) {
                 displayWinner();
-                resetGame();
+           
             }
             if (gameState[0][0] == currentPlayer && gameState[1][0] == currentPlayer && gameState[2][0] == currentPlayer) {
                 displayWinner();
-                resetGame();
+            
             }
             if (gameState[0][1] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][1] == currentPlayer) {
                 displayWinner();
-                resetGame();
+              
             }
             if (gameState[0][2] == currentPlayer && gameState[1][2] == currentPlayer && gameState[2][2] == currentPlayer) {
                 displayWinner();
-                resetGame();
+            
             }
             if (gameState[0][2] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][0] == currentPlayer) {
                 displayWinner();
-                resetGame();
+              
             }
             if (gameState[0][0] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][2] == currentPlayer) {
                 displayWinner();
-                resetGame();
+                
             }
             var draw = true;
             for (var i = 0; i < 3; ++i) {

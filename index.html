@@ -31,6 +31,7 @@
             align-items:center;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     </head>
     <body>
         <h1>Tic Tac Toe Game</h1>
@@ -54,6 +55,17 @@
         <div id="banner" class="banner" style="display:none">Player X win</div>
     </body>
     <script>
+        function createModel() {
+            const model = tf.sequential();
+            model.add(tf.layers.dense({ units: 64, inputShape: [9], activation: 'relu' }));
+            model.add(tf.layers.dense({ units: 64, activation: 'relu' }));
+            model.add(tf.layers.dense({ units: 9 })); // Output: Q-value for each cell
+            model.compile({ optimizer: 'adam', loss: 'meanSquaredError' });
+            return model;
+        };
+        const model = createModel();
+        console.log(model.summary());
+    
         const board = document.getElementById('game-board');
         let currentPlayer = 'X';
         const gameState = [['','',''],['','',''],['','','']];
@@ -103,7 +115,7 @@
             }
             if (gameState[0][0] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][2] == currentPlayer) {
                 displayWinner();
-                
+
             }
             var draw = true;
             for (var i = 0; i < 3; ++i) {

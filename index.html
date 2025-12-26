@@ -13,6 +13,23 @@
             text-align: center;
             border: 11px solid blanchedalmond;
         }
+        .banner {
+            display: flex;
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            bottom: 20%;
+            right: 20%;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 70px;
+            margin-top: 20px;
+            border: 50px solid rgb(144, 244, 255);
+            border-radius: 10px;
+            background-color: rgb(145, 245, 256);
+            justify-content:center;
+            align-items:center;
+        }
     </style>
     </head>
     <body>
@@ -34,6 +51,7 @@
                 <td id="cell-2,2"></td>
             </tr>
         </table>
+        <div id="banner" class="banner" style="display:none">Player X win</div>
     </body>
     <script>
         const board = document.getElementById('game-board');
@@ -43,6 +61,78 @@
         function resetGame() {
             gameState.forEach(row => row.fill(''));
             board.querySelectorAll('td').forEach(cell => cell.textContent = '');
+        }
+
+        function displayWinner() {
+            document.getElementById('banner').style.display = 'flex';
+            document.getElementById('banner').textContent = `Player ${currentPlayer} win!`;
+        }
+
+        function check() {
+            if (gameState[0][0] == currentPlayer && gameState[0][1] == currentPlayer && gameState[0][2] == currentPlayer) {
+                displayWinner();
+                resetGame();
+            }
+            if (gameState[1][0] == currentPlayer && gameState[1][1] == currentPlayer && gameState[1][2] == currentPlayer) {
+                displayWinner();
+                resetGame();
+            }
+            if (gameState[2][0] == currentPlayer && gameState[2][1] == currentPlayer && gameState[2][2] == currentPlayer) {
+                displayWinner();
+                resetGame();
+            }
+            if (gameState[0][0] == currentPlayer && gameState[1][0] == currentPlayer && gameState[2][0] == currentPlayer) {
+                displayWinner();
+                resetGame();
+            }
+            if (gameState[0][1] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][1] == currentPlayer) {
+                displayWinner();
+                resetGame();
+            }
+            if (gameState[0][2] == currentPlayer && gameState[1][2] == currentPlayer && gameState[2][2] == currentPlayer) {
+                displayWinner();
+                resetGame();
+            }
+            if (gameState[0][2] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][0] == currentPlayer) {
+                displayWinner();
+                resetGame();
+            }
+            if (gameState[0][0] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][2] == currentPlayer) {
+                displayWinner();
+                resetGame();
+            }
+            var draw = true;
+            for (var i = 0; i < 3; ++i) {
+                for (var j = 0; j < 3; ++j) {
+                    if (gameState[i][j] == '') {
+                        draw = false;
+                    }
+                }
+            }
+            
+            if (draw) {
+                displayWinner();
+                resetGame();
+            }
+        
+        }
+
+        function computerMove() {
+            setTimeout(() => {
+                while (true) {
+                    const move = Math.floor(Math.random() * 9);
+                    const row = Math.floor(move / 3);
+                    const col = move % 3;
+
+                    if (gameState[row][col] == '') {
+                        gameState[row][col] = 'O';
+                        document.getElementById(`cell-${row},${col}`).textContent = 'O';
+                        break;
+                    }
+                }
+                check();
+                currentPlayer = 'X';
+            }, 50); 
         }
 
         board.addEventListener('click', function(event) {
@@ -55,53 +145,12 @@
                 gameState[coordinate[0]][coordinate[1]] = currentPlayer;
                 console.log(gameState);
 
-                if (gameState[0][0] == currentPlayer && gameState[0][1] == currentPlayer && gameState[0][2] == currentPlayer) {
-                    alert(currentPlayer + " win!");
-                    resetGame();
-                }
-                if (gameState[1][0] == currentPlayer && gameState[1][1] == currentPlayer && gameState[1][2] == currentPlayer) {
-                    alert(currentPlayer + " win!");
-                    resetGame();
-                }
-                if (gameState[2][0] == currentPlayer && gameState[2][1] == currentPlayer && gameState[2][2] == currentPlayer) {
-                    alert(currentPlayer + " win!");
-                    resetGame();
-                }
-                if (gameState[0][0] == currentPlayer && gameState[1][0] == currentPlayer && gameState[2][0] == currentPlayer) {
-                    alert(currentPlayer + " win!");
-                    resetGame();
-                }
-                if (gameState[0][1] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][1] == currentPlayer) {
-                    alert(currentPlayer + " win!");
-                    resetGame();
-                }
-                if (gameState[0][2] == currentPlayer && gameState[1][2] == currentPlayer && gameState[2][2] == currentPlayer) {
-                    alert(currentPlayer + " win!");
-                    resetGame();
-                }
-                if (gameState[0][2] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][0] == currentPlayer) {
-                    alert(currentPlayer + " win!");
-                    resetGame();
-                }
-                if (gameState[0][0] == currentPlayer && gameState[1][1] == currentPlayer && gameState[2][2] == currentPlayer) {
-                    alert(currentPlayer + " win!");
-                    resetGame();
-                }
-                var draw = true;
-                for (var i = 0; i < 3; ++i) {
-                    for (var j = 0; j < 3; ++j) {
-                        if (gameState[i][j] == '') {
-                            draw = false;
-                        }
-                    }
-                }
-                
-                if (draw) {
-                    alert("Draw!");
-                    resetGame();
-                }
+                check();
 
                 currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                if (currentPlayer === 'O') {
+                    computerMove();
+                }
             }
         });
 

@@ -65,6 +65,43 @@
         };
         const model = createModel();
         console.log(model.summary());
+        output = tf.tidy(() => {
+            const input = tf.tensor2d([[1,0,0,0,0,0,0,0,0]], [1, 9]);
+            const output = model.predict(input);
+            return output.dataSync();
+        });
+        console.log(output);
+
+        const f = (x) => model.predict(x);
+        const loss = (pred, label) => pred.sub(label).square().mean();
+        const optimizer = tf.train.sgd(0.1);
+
+        // A manual "synchronous" training loop
+        for (let i = 0; i < 100; i++) {
+            // Use tf.tidy to avoid memory leaks in the loop
+            tf.tidy(() => {
+                optimizer.minimize(() => {
+                    const input = tf.tensor2d([[0,0,0,0,0,0,0,0,0]], [1, 9]);
+                    const output = tf.tensor2d([[0,0,0,0,1,0,0,0,0]], [1, 9]);
+                    const pred = f(input);
+                    return loss(pred, output);
+                });
+            });
+        }
+
+        console.log('Training complete');
+        console.log(model.predict(tf.tensor2d([[-1,-1,0,1,0,0,1,0,0]], [1, 9])).dataSync());
+
+
+        optimizer.minimize(() => {
+            const input = tf.tensor2d([[-1,-1,0,1,0,0,1,0,0]], [1, 9]);
+            const output = tf.tensor2d([[0,0,0,0,-100,0,0,0,0]], [1, 9]);
+            const pred = f(input);
+            return loss(pred, output);
+        });
+
+        console.log(model.predict(tf.tensor2d([[-1,-1,0,1,0,0,1,0,0]], [1, 9])).dataSync());
+
     
         const board = document.getElementById('game-board');
         let currentPlayer = 'X';

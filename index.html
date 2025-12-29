@@ -79,7 +79,33 @@
             board.querySelectorAll('td').forEach(cell => cell.textContent = '');
         }
 
+        let lastInput = null;
+        let lastOutput = null;
+        let lastMove = null;
+
         function displayWinner() {
+            tf.tidy(() => {
+                const input = lastInput.slice()
+                const output = lastOutput.slice();
+
+                if (currentPlayer === 'X') {
+                    output[lastMove] -= 10;
+                } else {
+                    output[lastMove] += 10;
+                }
+
+                console.log("Training on ", input, output);
+
+                const inputTensor = tf.tensor2d([input]);
+                const targetTensor = tf.tensor2d([output]);
+                const lossTensor = optimizer.minimize(() => {
+                    const pred = f(inputTensor);
+                    return loss(pred, targetTensor);
+                }, true);
+                console.log("Loss: ", lossTensor.dataSync()[0]);
+            });
+
+
             document.getElementById('banner').style.display = 'flex';
             document.getElementById('banner').textContent = `Player ${currentPlayer} win!`;
             setTimeout(() => {
@@ -139,27 +165,18 @@
 
         function computerMove() {
             setTimeout(() => {
-                /*while (true) {
-                    const move = Math.floor(Math.random() * 9);
-                    const row = Math.floor(move / 3);
-                    const col = move % 3;
-
-                    if (gameState[row][col] == '') {
-                        gameState[row][col] = 'O';
-                        document.getElementById(`cell-${row},${col}`).textContent = 'O';
-                        break;
-                    }
-                }*/
                 const input = [];
                 for (let i = 0; i < 9; i++) {
                     const row = Math.floor(i / 3);
                     const col = i % 3;
                     input.push(gameState[row][col] === 'X' ? 1 : gameState[row][col] === 'O' ? -1 : 0);
                 }
+                lastInput = input;
                 console.log("Input to model: ", input);
                 const inputTensor = tf.tensor2d([input]);
                 const outputTensor = model.predict(inputTensor);
-                const outputData = outputTensor.dataSync();
+                const outputData = Array.from(outputTensor.dataSync());
+                lastOutput = outputData;
                 console.log("Model output: ", outputData);
 
                 let row = -1;
@@ -177,6 +194,8 @@
                         col = c;
                     }
                 } 
+                lastMove = bestMove;
+                console.log(`Computer chooses cell (${row}, ${col})`);
 
                 gameState[row][col] = 'O';
                 document.getElementById(`cell-${row},${col}`).textContent = 'O';

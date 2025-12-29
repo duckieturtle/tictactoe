@@ -65,43 +65,10 @@
         };
         const model = createModel();
         console.log(model.summary());
-        output = tf.tidy(() => {
-            const input = tf.tensor2d([[1,0,0,0,0,0,0,0,0]], [1, 9]);
-            const output = model.predict(input);
-            return output.dataSync();
-        });
-        console.log(output);
-
+        
         const f = (x) => model.predict(x);
         const loss = (pred, label) => pred.sub(label).square().mean();
         const optimizer = tf.train.sgd(0.1);
-
-        // A manual "synchronous" training loop
-        for (let i = 0; i < 100; i++) {
-            // Use tf.tidy to avoid memory leaks in the loop
-            tf.tidy(() => {
-                optimizer.minimize(() => {
-                    const input = tf.tensor2d([[0,0,0,0,0,0,0,0,0]], [1, 9]);
-                    const output = tf.tensor2d([[0,0,0,0,1,0,0,0,0]], [1, 9]);
-                    const pred = f(input);
-                    return loss(pred, output);
-                });
-            });
-        }
-
-        console.log('Training complete');
-        console.log(model.predict(tf.tensor2d([[-1,-1,0,1,0,0,1,0,0]], [1, 9])).dataSync());
-
-
-        optimizer.minimize(() => {
-            const input = tf.tensor2d([[-1,-1,0,1,0,0,1,0,0]], [1, 9]);
-            const output = tf.tensor2d([[0,0,0,0,-100,0,0,0,0]], [1, 9]);
-            const pred = f(input);
-            return loss(pred, output);
-        });
-
-        console.log(model.predict(tf.tensor2d([[-1,-1,0,1,0,0,1,0,0]], [1, 9])).dataSync());
-
     
         const board = document.getElementById('game-board');
         let currentPlayer = 'X';
@@ -172,7 +139,7 @@
 
         function computerMove() {
             setTimeout(() => {
-                while (true) {
+                /*while (true) {
                     const move = Math.floor(Math.random() * 9);
                     const row = Math.floor(move / 3);
                     const col = move % 3;
@@ -182,7 +149,37 @@
                         document.getElementById(`cell-${row},${col}`).textContent = 'O';
                         break;
                     }
+                }*/
+                const input = [];
+                for (let i = 0; i < 9; i++) {
+                    const row = Math.floor(i / 3);
+                    const col = i % 3;
+                    input.push(gameState[row][col] === 'X' ? 1 : gameState[row][col] === 'O' ? -1 : 0);
                 }
+                console.log("Input to model: ", input);
+                const inputTensor = tf.tensor2d([input]);
+                const outputTensor = model.predict(inputTensor);
+                const outputData = outputTensor.dataSync();
+                console.log("Model output: ", outputData);
+
+                let row = -1;
+                let col = -1;
+                let bestMove = -1;
+                let bestValue = -Infinity;
+                
+                for (let i = 0; i < 9; i++) {
+                    const r = Math.floor(i / 3);
+                    const c = i % 3;
+                    if (gameState[r][c] === '' && outputData[i] > bestValue) {
+                        bestValue = outputData[i];
+                        bestMove = i;
+                        row = r;
+                        col = c;
+                    }
+                } 
+
+                gameState[row][col] = 'O';
+                document.getElementById(`cell-${row},${col}`).textContent = 'O';
                 check();
                 currentPlayer = 'X';
             }, 50); 

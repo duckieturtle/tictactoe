@@ -213,6 +213,29 @@
             }, 50); 
         }
 
+        function playRandomMove() {
+            const emptyCells = [];
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (gameState[i][j] === '') {
+                        emptyCells.push([i, j]);
+                    }
+                }
+            }
+            if (emptyCells.length === 0) {
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * emptyCells.length);
+            const [row, col] = emptyCells[randomIndex];
+            gameState[row][col] = 'X';
+            document.getElementById(`cell-${row},${col}`).textContent = 'X';
+            if (check()) {
+                return;
+            }
+            currentPlayer = 'O';
+            computerMove();
+        }
+
         board.addEventListener('click', function(event) {
             const target = event.target;
 

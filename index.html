@@ -207,19 +207,20 @@
         board.addEventListener('click', function(event) {
             const target = event.target;
 
+            if (currentPlayer !== 'X') {
+                return;
+            }
+
             if (target.tagName === 'TD' && target.textContent === '') {
                 const coordinate = target.id.split("-")[1].split(",");
 
-                target.textContent = currentPlayer;
-                gameState[coordinate[0]][coordinate[1]] = currentPlayer;
-                console.log(gameState);
-
+                target.textContent = 'X';
+                gameState[coordinate[0]][coordinate[1]] = 'X'
+                
                 check();
 
-                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                if (currentPlayer === 'O') {
-                    computerMove();
-                }
+                currentPlayer = 'O';
+                computerMove();
             }
         });
 

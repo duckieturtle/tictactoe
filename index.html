@@ -34,6 +34,18 @@
             justify-content:center;
             align-items:center;
         }
+
+        #button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 20px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     </head>
@@ -50,6 +62,7 @@
             </tr>
         </table>
         <div id="chart"></div>
+        <div id="button">START</div>
         <table id="game-board" class="game-board">
             <tr>
                 <td id="cell-0,0"></td>
@@ -281,6 +294,20 @@
                 currentPlayer = 'O';
                 computerMove();
             }
+        });
+
+        // State of the training, if it is null no training is happening, otherwise it holds the interval ID.
+        let intervalId = null;
+
+        document.getElementById('button').addEventListener('click', function() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+                this.textContent = 'Start';
+                return;
+            }
+            this.textContent = 'Stop';
+            intervalId = setInterval(playRandomMove, 1); 
         });
 
 

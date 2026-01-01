@@ -1,7 +1,11 @@
 <html>
     <head>
     <title>Tic tac toe</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
+        .dot { fill: #4e79a7; opacity: 0.7; }
+        .dot:hover { fill: #e15759; opacity: 1; }
+        .axis-label { font-family: sans-serif; font-size: 12px; }
         .game-board {
             font-size: 50px;
             border: 11px solid blanchedalmond;
@@ -45,6 +49,7 @@
                 <td>Loss: <span id="loss">0</span></td>
             </tr>
         </table>
+        <div id="chart"></div>
         <table id="game-board" class="game-board">
             <tr>
                 <td id="cell-0,0"></td>
@@ -133,6 +138,7 @@
             } else {
                 document.getElementById('banner').textContent = `Player ${currentPlayer} win!`;
             }
+            updateChart();
             setTimeout(() => {
                 document.getElementById('banner').style.display = 'none';
                 resetGame();
@@ -276,6 +282,78 @@
                 computerMove();
             }
         });
+
+
+        const chartData = [];
+
+        // 2. Dimensions and Margins
+        const margin = { top: 20, right: 30, bottom: 40, left: 50 },
+            width = 500 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        const lineGenerator = d3.line()
+            .x(d => xScale(d.x))
+            .y(d => yScale(d.y))
+            .curve(d3.curveMonotoneX); // Optional: makes the line smooth
+
+        // 3. Create SVG Container
+        const svg = d3.select("#chart")
+            .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // 4. Create Scales
+        // Map data values (0-200) to pixel values (0-width)
+        const xScale = d3.scaleLinear()
+            .domain([0, d3.max(chartData, d => d.x) + 10])
+            .range([0, width]);
+
+        // Map data values to pixels (height-0) -> Y is inverted in SVG
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(chartData, d => d.y) + 10])
+            .range([height, 0]);
+
+        // 5. Add Axes
+        svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(xScale));
+
+        svg.append("g")
+            .call(d3.axisLeft(yScale));
+
+        // Add the path element once
+        const path = svg.append("path")
+            .datum(chartData) // Use .datum() for a single object (the whole array)
+            .attr("class", "line-path")
+            .attr("fill", "none")
+            .attr("stroke", "#4e79a7")
+            .attr("stroke-width", 2)
+            .attr("d", lineGenerator);
+
+        function updateChart() {
+            if (computerWins + randomWins + draws > 0) {
+                chartData.push({ x: computerWins + randomWins + draws, y: randomWins / (computerWins + randomWins + draws) * 100 });
+            }
+            // 1. Always sort data by X so the line flows left-to-right
+            chartData.sort((a, b) => a.x - b.x);
+
+            // 2. Update scales
+            xScale.domain(d3.extent(chartData, d => d.x));
+            yScale.domain([0, d3.max(chartData, d => d.y)]);
+
+            // 3. Update Axes
+            svg.select(".x-axis").transition().duration(750).call(d3.axisBottom(xScale));
+            svg.select(".y-axis").transition().duration(750).call(d3.axisLeft(yScale));
+
+            // 4. Update the Path
+            svg.select(".line-path")
+                .datum(chartData)
+                .transition()
+                .duration(750)
+                .attr("d", lineGenerator);        
+        }
 
     </script>
 </html>

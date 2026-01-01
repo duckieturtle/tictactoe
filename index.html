@@ -35,6 +35,16 @@
     </head>
     <body>
         <h1>Tic Tac Toe Game</h1>
+        <table>
+            <tr>
+                <td>Computer (O) Wins: <span id="computer-wins">0</span></td>
+                <td>Random (X) Wins: <span id="random-wins">0</span></td>
+                <td>Draws: <span id="draws">0</span></td>
+            </tr>
+            <tr>
+                <td>Loss: <span id="loss">0</span></td>
+            </tr>
+        </table>
         <table id="game-board" class="game-board">
             <tr>
                 <td id="cell-0,0"></td>
@@ -55,6 +65,11 @@
         <div id="banner" class="banner" style="display:none">Player X win</div>
     </body>
     <script>
+
+        let computerWins = 0;
+        let randomWins = 0;
+        let draws = 0;
+
         function createModel() {
             const model = tf.sequential();
             model.add(tf.layers.dense({ units: 64, inputShape: [9], activation: 'relu' }));
@@ -89,22 +104,26 @@
                 const output = lastOutput.slice();
 
                 if (draw) {
-                    output[lastMove] += 1;
+                    output[lastMove] = 0.5;
+                    draws += 1;
                 } else if (currentPlayer === 'X') {
-                    output[lastMove] -= 10;
+                    output[lastMove] = -1;
+                    randomWins += 1;
                 } else {
-                    output[lastMove] += 10;
+                    output[lastMove] = 1;
+                    computerWins += 1;
                 }
-
-                console.log("Training on ", input, output);
-
+                
                 const inputTensor = tf.tensor2d([input]);
                 const targetTensor = tf.tensor2d([output]);
                 const lossTensor = optimizer.minimize(() => {
                     const pred = f(inputTensor);
                     return loss(pred, targetTensor);
                 }, true);
-                console.log("Loss: ", lossTensor.dataSync()[0]);
+                document.getElementById('computer-wins').textContent = computerWins;
+                document.getElementById('random-wins').textContent = randomWins;
+                document.getElementById('draws').textContent = draws;
+                document.getElementById('loss').textContent = lossTensor.dataSync()[0].toFixed(4) + " " + output[lastMove].toFixed(4);
             });
 
 
@@ -117,7 +136,7 @@
             setTimeout(() => {
                 document.getElementById('banner').style.display = 'none';
                 resetGame();
-            }, 2000);
+            }, 0);
         }
 
         function check() {
@@ -181,13 +200,11 @@
                     input.push(gameState[row][col] === 'X' ? 1 : gameState[row][col] === 'O' ? -1 : 0);
                 }
                 lastInput = input;
-                console.log("Input to model: ", input);
                 const inputTensor = tf.tensor2d([input]);
                 const outputTensor = model.predict(inputTensor);
                 const outputData = Array.from(outputTensor.dataSync());
                 lastOutput = outputData;
-                console.log("Model output: ", outputData);
-
+              
                 let row = -1;
                 let col = -1;
                 let bestMove = -1;
@@ -204,16 +221,18 @@
                     }
                 } 
                 lastMove = bestMove;
-                console.log(`Computer chooses cell (${row}, ${col})`);
-
+            
                 gameState[row][col] = 'O';
                 document.getElementById(`cell-${row},${col}`).textContent = 'O';
                 check();
                 currentPlayer = 'X';
-            }, 50); 
+            }, 0);
         }
 
         function playRandomMove() {
+            if (currentPlayer !== 'X') {
+                return;
+            }
             const emptyCells = [];
             for (let i = 0; i < 3; i++) {
                 for (let j = 0; j < 3; j++) {

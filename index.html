@@ -112,6 +112,7 @@
             board.querySelectorAll('td').forEach(cell => cell.textContent = '');
         }
 
+        let training = false;
         let lastInput = null;
         let lastOutput = null;
         let lastMove = null;
@@ -144,18 +145,22 @@
                 document.getElementById('loss').textContent = lossTensor.dataSync()[0].toFixed(4) + " " + output[lastMove].toFixed(4);
             });
 
-
-            document.getElementById('banner').style.display = 'flex';
-            if (draw) {
-                document.getElementById('banner').textContent = `It's a draw!`;
-            } else {
-                document.getElementById('banner').textContent = `Player ${currentPlayer} win!`;
-            }
             updateChart();
-            setTimeout(() => {
-                document.getElementById('banner').style.display = 'none';
+
+            if (!training) {
+                document.getElementById('banner').style.display = 'flex';
+                if (draw) {
+                    document.getElementById('banner').textContent = `It's a draw!`;
+                } else {
+                    document.getElementById('banner').textContent = `Player ${currentPlayer} win!`;
+                }
+                setTimeout(() => {
+                    document.getElementById('banner').style.display = 'none';
+                    resetGame();
+                }, 500);
+            } else {
                 resetGame();
-            }, 0);
+            }
         }
 
         function check() {
@@ -302,11 +307,13 @@
         document.getElementById('button').addEventListener('click', function() {
             if (intervalId) {
                 clearInterval(intervalId);
+                training = false;
                 intervalId = null;
                 this.textContent = 'Start';
                 return;
             }
             this.textContent = 'Stop';
+            training = true;
             intervalId = setInterval(playRandomMove, 1); 
         });
 
@@ -377,8 +384,6 @@
             // 4. Update the Path
             svg.select(".line-path")
                 .datum(chartData)
-                .transition()
-                .duration(750)
                 .attr("d", lineGenerator);        
         }
 

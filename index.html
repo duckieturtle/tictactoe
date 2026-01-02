@@ -117,6 +117,8 @@
         let lastOutput = null;
         let lastMove = null;
 
+        const last100Scores = [];
+
         function displayWinner(draw=false) {
             tf.tidy(() => {
                 const input = lastInput.slice()
@@ -125,12 +127,18 @@
                 if (draw) {
                     output[lastMove] = 0.5;
                     draws += 1;
+                    last100Scores.push(0);
                 } else if (currentPlayer === 'X') {
                     output[lastMove] = -1;
                     randomWins += 1;
+                    last100Scores.push(1);
                 } else {
                     output[lastMove] = 1;
                     computerWins += 1;
+                    last100Scores.push(0);
+                }
+                if (last100Scores.length > 100) {
+                    last100Scores.shift();
                 }
                 
                 const inputTensor = tf.tensor2d([input]);
@@ -368,7 +376,7 @@
 
         function updateChart() {
             if (computerWins + randomWins + draws > 0) {
-                chartData.push({ x: computerWins + randomWins + draws, y: randomWins / (computerWins + randomWins + draws) * 100 });
+                chartData.push({ x: computerWins + randomWins + draws, y: last100Scores.reduce((a, b) => a + b, 0) / last100Scores.length });
             }
             // 1. Always sort data by X so the line flows left-to-right
             chartData.sort((a, b) => a.x - b.x);

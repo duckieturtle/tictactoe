@@ -113,36 +113,47 @@
         }
 
         let training = false;
-        let lastInput = null;
-        let lastOutput = null;
-        let lastMove = null;
+        let lastInputs = [];
+        let lastOutputs = [];
+        let lastMoves = [];
 
         const last100Scores = [];
 
         function displayWinner(draw=false) {
             tf.tidy(() => {
-                const input = lastInput.slice()
-                const output = lastOutput.slice();
+                const inputs = lastInputs.map(input => input.slice());
+                const outputs = lastOutputs.map(output => output.slice());
+                const moves = lastMoves.slice()
+                const lastMove = moves[moves.length - 1];
 
+                
                 if (draw) {
-                    output[lastMove] = 0.5;
+                    for (let i = 0; i < inputs.length; i++) {
+                        outputs[i][moves[i]] = Math.min(1, outputs[i][moves[i]] + 0.2);
+                    }
                     draws += 1;
                     last100Scores.push(0);
                 } else if (currentPlayer === 'X') {
-                    output[lastMove] = -1;
+                    for (let i = 0; i < inputs.length; i++) {
+                        outputs[i][moves[i]] = Math.max(-1, outputs[i][moves[i]] - 0.5);
+                    }
                     randomWins += 1;
                     last100Scores.push(1);
                 } else {
-                    output[lastMove] = 1;
+                    for (let i = 0; i < inputs.length; i++) {
+                        outputs[i][moves[i]] = Math.min(1, outputs[i][moves[i]] + 0.5);
+                    }
                     computerWins += 1;
                     last100Scores.push(0);
                 }
                 if (last100Scores.length > 100) {
                     last100Scores.shift();
                 }
-                
-                const inputTensor = tf.tensor2d([input]);
-                const targetTensor = tf.tensor2d([output]);
+
+                //console.log('Game ended. Updating model.', inputs, outputs, moves);
+
+                const inputTensor = tf.tensor2d(inputs);
+                const targetTensor = tf.tensor2d(outputs);
                 const lossTensor = optimizer.minimize(() => {
                     const pred = f(inputTensor);
                     return loss(pred, targetTensor);
@@ -150,8 +161,12 @@
                 document.getElementById('computer-wins').textContent = computerWins;
                 document.getElementById('random-wins').textContent = randomWins;
                 document.getElementById('draws').textContent = draws;
-                document.getElementById('loss').textContent = lossTensor.dataSync()[0].toFixed(4) + " " + output[lastMove].toFixed(4);
+                document.getElementById('loss').textContent = lossTensor.dataSync()[0].toFixed(4);
             });
+
+            lastInputs = [];
+            lastOutputs = [];
+            lastMoves = [];
 
             updateChart();
 
@@ -231,11 +246,11 @@
                     const col = i % 3;
                     input.push(gameState[row][col] === 'X' ? 1 : gameState[row][col] === 'O' ? -1 : 0);
                 }
-                lastInput = input;
+                lastInputs.push(input.slice());
                 const inputTensor = tf.tensor2d([input]);
                 const outputTensor = model.predict(inputTensor);
                 const outputData = Array.from(outputTensor.dataSync());
-                lastOutput = outputData;
+                lastOutputs.push(outputData.slice());
               
                 let row = -1;
                 let col = -1;
@@ -252,7 +267,7 @@
                         col = c;
                     }
                 } 
-                lastMove = bestMove;
+                lastMoves.push(bestMove);
             
                 gameState[row][col] = 'O';
                 document.getElementById(`cell-${row},${col}`).textContent = 'O';
